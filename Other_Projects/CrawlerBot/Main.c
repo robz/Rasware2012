@@ -3,53 +3,77 @@
 #include "utils/uartstdio.h"	// input/output over UART
 #include "driverlib/uart.h"		// input/output over UART
 #include "RASLib/init.h"
+#include "RASLib/servo.h"
+
+#define COMMAND_EXECUTION_PERIOD_MS 1000
+#define NUM_COMMANDS 1
+
+LegCommand COMMANDS[2][NUM_COMMANDS] = { 
+	{ // left leg commands as {hip, knee} pairs
+		{0,0},
+	}, 
+	{ // right leg commands as {hip, knee} pairs
+		{0,0},
+	} 
+};
+
+LegCommand* LEFT_LEG_COMMANDS = COMMANDS[LeftLeg];
+LegCommand* RIGHT_LEG_COMMANDS = COMMANDS[RightLeg];
+
+LegServoInfo LEG_SERVOS[2] = {
+	{SERVO_3, SERVO_2}, // left
+	{SERVO_1, SERVO_0}  // right
+};
+
+void executeCommand(LegID leg, LegCommand c);
+void pauseExecution(unsigned int ms);
 
 int main(void)
-{	
-	char ch;	  	 
+{	  	 
 	LockoutProtection();
 	InitializeMCU();
-	initUART();																							    
+	
+	initUART();			
+	initServo();
+	
+	UARTprintf("\n\nCrawler's gotta crawl...\n");																	    
 	
 	while(1) {	
-		UARTprintf("\nRAS Demo for Robotathon 2012\n");
-		UARTprintf("  0=UART Demo\n  1=Motor Demo\n");
-		UARTprintf("  2=Servo Demo\n  3=Line Sensor\n");
-		UARTprintf("  4=IR Sensor Demo\n  5=Encoders Demo\n");
+		char ch;
+		int i;
 		
-		UARTprintf(">> ");
+		UARTprintf("press any key to continue...");
 		ch = getc();
 		putc(ch);
-		UARTprintf("\n");
+		
+		UARTprintf("\n executing commands!\n");
+		
+		for (i = 0; i < NUM_COMMANDS; i++) {	
+			UARTprintf("   command #%d...\n", i);
+			
+			executeCommand(RightLeg, RIGHT_LEG_COMMANDS[i]);
+			executeCommand(LeftLeg, LEFT_LEG_COMMANDS[i]);
+			pauseExecution(COMMAND_EXECUTION_PERIOD_MS);
+		}
+		
+		UARTprintf(" commands executed!\n");
+	}
+}
 
-		if (ch == '0') {
-			UARTprintf("\nUART Demo\n");
-			uartDemo();	 
-		}
-		else if (ch == '1') {
-			UARTprintf("\nMotor Demo\n");
-			initMotors();
-			motorDemo(); 
-		}
-		else if (ch == '2') {
-			UARTprintf("\nServo Demo\n");
-			initServo();
-			servoDemo();   
-		}
-		else if (ch == '3') {			   
-			UARTprintf("\nLine Sensor Demo\n");
-			initLineSensor();		  
-			lineSensorDemo();
-		}
-		else if (ch == '4') {	   
-			UARTprintf("\nIR Sensor Demo\n");
-			initIRSensor();
-			IRSensorDemo();	 
-		}
-		else if (ch == '5') {
-			UARTprintf("\nEncoders Demo\n");
-			initEncoders();
-			encoderDemo();
-		}
+void pauseExecution(unsigned int ms) {
+	unsigned int i, j;
+	for (j = 0; j < ms; j++) {
+		for (i = 0; i < 10000; i++);
+	}
+}
+
+void executeCommand(LegID legId, LegCommand c) {
+	LegServoInfo legServos = LEG_SERVOS[legId];
+	if (legId == LeftLeg) {
+		SetServoPosition(legServos.hipServo, 255 - c.hipPosition); 
+		SetServoPosition(legServos.kneeServo, 255 - c.kneePosition);
+	} else {
+		SetServoPosition(legServos.hipServo, c.hipPosition); 
+		SetServoPosition(legServos.kneeServo, c.kneePosition);
 	}
 }
