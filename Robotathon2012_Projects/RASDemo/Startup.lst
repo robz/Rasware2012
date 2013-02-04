@@ -379,9 +379,9 @@ ARM Macro Assembler    Page 6
                        ***********************
   250 00000000                 END
 Command Line: --debug --xref --cpu=Cortex-M3 --apcs=interwork --depend=Startup.
-d -oStartup.o -I"D:\Program Files\Keil\ARM\RV31\Inc" -I"D:\Program Files\Keil\A
-RM\CMSIS\Include" -I"D:\Program Files\Keil\ARM\Inc\Luminary" --predefine="__EVA
-L SETA 1" --predefine="__MICROLIB SETA 1" --list=Startup.lst Startup.s
+d -oStartup.o -IC:\Keil\ARM\RV31\Inc -IC:\Keil\ARM\CMSIS\Include -IC:\Keil\ARM\
+Inc\Luminary --predefine="__EVAL SETA 1" --predefine="__MICROLIB SETA 1" --list
+=Startup.lst Startup.s
 
 
 
