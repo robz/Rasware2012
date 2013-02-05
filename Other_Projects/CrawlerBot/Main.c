@@ -7,14 +7,14 @@
 
 #define COMMAND_TIME 1000
 #define TIME_INC 10
-#define NUM_COMMANDS 2
+#define NUM_COMMANDS 3
 
 LegCommand COMMANDS[2][NUM_COMMANDS] = { 
 	{ // left leg commands as {hip, knee} pairs
-		{0,0},{0,0}
+		{50,0},{150,160},{150,0}
 	}, 
 	{ // right leg commands as {hip, knee} pairs
-		{0,0},{0,0}
+		{150,160},{150,0},{50,0}
 	} 
 };
 
@@ -33,6 +33,8 @@ void pause(unsigned short ms);
 
 int main(void)
 {	  	 
+	int firstRun;
+	
 	LockoutProtection();
 	InitializeMCU();
 	
@@ -44,30 +46,30 @@ int main(void)
 	SetServoPosition(SERVO_1, 0);
 	SetServoPosition(SERVO_0, 0);
 	
-	UARTprintf("\n\nCrawler's gotta crawl...\n");		
-  UARTprintf("sizeof unsigned short: %d\n", sizeof(unsigned short));															    
+	UARTprintf("\n\nCrawler's gotta crawl!\npress any key to continue...");
+	// getc();
+	
+	firstRun = true;
 	
 	while(1) {	
-		char ch;
 		int i;
-		
-		UARTprintf("press any key to continue...");
-		ch = getc();
-		putc(ch);
 		
 		UARTprintf("\n executing commands!\n");
 		
-		//stepThruCommand(0, 255);
 		for (i = 0; i < NUM_COMMANDS; i++) {	
 			UARTprintf("   command #%d...\n", i);
-			if (i == 0) {
+			
+			if (firstRun) {
 				executeCommand(RIGHT_LEG_COMMANDS[i], initPos,
 											 LEFT_LEG_COMMANDS[i], initPos);
+				firstRun = false;
+			} else if (i == 0) {
+				executeCommand(RIGHT_LEG_COMMANDS[i], RIGHT_LEG_COMMANDS[NUM_COMMANDS-1],
+											 LEFT_LEG_COMMANDS[i], LEFT_LEG_COMMANDS[NUM_COMMANDS-1]);
 			} else {
 				executeCommand(RIGHT_LEG_COMMANDS[i], RIGHT_LEG_COMMANDS[i-1],
 											 LEFT_LEG_COMMANDS[i], LEFT_LEG_COMMANDS[i-1]);
 			}
-			// pause(TIME_BETWEEN_COMMANDS);
 		}
 		
 		UARTprintf(" commands executed!\n");
@@ -90,9 +92,6 @@ unsigned char pos_funct(unsigned char p0, unsigned char p1, unsigned short t) {
 
 void stepCommandOnce(servo_t servo, unsigned char p0, unsigned char p1, unsigned short time_ms) {
 	unsigned char pos = pos_funct(p0, p1, time_ms);
-	if (servo == SERVO_2) {
-		UARTprintf("%d %d %d %d\n", time_ms, p0, p1, pos);
-	}
 	SetServoPosition(servo, pos);
 }
 
