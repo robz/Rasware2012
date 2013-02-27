@@ -5,16 +5,20 @@
 #include "RASLib/init.h"
 #include "RASLib/servo.h"
 
-#define COMMAND_TIME 700
+#define COMMAND_TIME 500
 #define TIME_INC 1
-#define NUM_COMMANDS 4
+#define NUM_COMMANDS 5
 
 LegCommand COMMANDS[2][NUM_COMMANDS] = { 
 	{ // left leg commands as {hip, knee} pairs
-		{180,140},{160,0},{50,0},{0,0}
+		//{0,0},{0,0},{0,0},{0,0},{0,0},{0,0}
+		//{255,0},{255,0},{255,0},
+		{120,0},{50,0},{120,140},{160,100},{120,0},
 	}, 
 	{ // right leg commands as {hip, knee} pairs
-		{50,0},{0,0},{180,140},{160,0}
+		//{200,100},{200,0},{100,0},
+		//{0,0},{0,0},{0,0},{0,0},{0,0},
+		{160,100},{120,0},{120,0},{50,0},{120,150},
 	} 
 }; 
 
@@ -24,8 +28,8 @@ LegCommand* LEFT_LEG_COMMANDS = COMMANDS[LeftLeg];
 LegCommand* RIGHT_LEG_COMMANDS = COMMANDS[RightLeg];
 
 LegServoInfo LEG_SERVOS[2] = {
-	{SERVO_3, SERVO_2}, // left
-	{SERVO_1, SERVO_0}  // right
+	{SERVO_1, SERVO_3}, // left {hip, knee}
+	{SERVO_2, SERVO_0}  // right {hip, knee}
 };
 
 void executeCommand(LegCommand curRight, LegCommand oldRight, LegCommand curLeft, LegCommand oldLeft);
@@ -41,10 +45,10 @@ int main(void)
 	initUART();			
 	initServo();
 	
-  SetServoPosition(SERVO_3, 255);
-	SetServoPosition(SERVO_2, 255);
-	SetServoPosition(SERVO_1, 0);
-	SetServoPosition(SERVO_0, 0);
+  SetServoPosition(LEG_SERVOS[0].kneeServo, 255);
+	SetServoPosition(LEG_SERVOS[0].hipServo, 255);
+	SetServoPosition(LEG_SERVOS[1].hipServo, 0);
+	SetServoPosition(LEG_SERVOS[1].hipServo, 0);
 	
 	UARTprintf("\n\nCrawler's gotta crawl!\npress any key to continue...");
 	//getc();
@@ -57,7 +61,7 @@ int main(void)
 		UARTprintf("\n executing commands!\n");
 		
 		for (i = 0; i < NUM_COMMANDS; i++) {	
-			getc();
+			//getc();
 			UARTprintf("   command #%d...\n", i);
 			
 			if (firstRun) {
