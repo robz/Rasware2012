@@ -1,4 +1,3 @@
-#include "inc/hw_types.h"		// tBoolean
 #include "CrawlerBot.h"
 #include "utils/uartstdio.h"	// input/output over UART
 #include "driverlib/uart.h"		// input/output over UART
@@ -81,6 +80,7 @@ int main(void)
 	}
 }
 
+/*
 // accurate to 1 tick for 0 < b < 1676, 0 <= t <= b, abs(p0 - p1) < 255
 unsigned char pos_funct(int p0, int p1, int t, int b) {
   int res = 2*(p0 - p1)*t*t/b*t/b/b + 3*(p1 - p0)*t*t/b/b + p0;
@@ -91,6 +91,31 @@ unsigned char pos_funct(int p0, int p1, int t, int b) {
 		res = p1;
 	}
 	
+	return (unsigned char) res;
+}
+*/
+
+int prevVal = -1;
+
+unsigned char pos_funct(int p0, int p1, int t, int b) {
+  int res = getSmoothServoValue(p0, p1, b, t, 0, 0);
+	
+	if (p1 > p0 && res > p1) {
+		res = p1;
+	} else if (p1 < p0 && res < p1) {
+		res = p1;
+	}
+	/*
+	if (-1 != prevVal) {
+		if (p1 > p0 && res < prevVal) {
+			res = prevVal;
+		} else if (p1 < p0 && res > prevVal) {
+			res = prevVal;
+		}
+	}
+	
+	prevVal = res;
+	*/
 	return (unsigned char) res;
 }
 

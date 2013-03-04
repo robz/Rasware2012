@@ -1,3 +1,4 @@
+#include "inc/hw_types.h"		// tBoolean
 #include "RASLib/servo.h"
 
 struct LegCommand {
@@ -27,3 +28,6 @@ void servoDemo(void);
 // Functions in EncoderDemo
 void initEncoders(void);
 void encoderDemo(void);
+
+// Functions in Movement
+int getSmoothServoValue(int x0, int x1, int dt, int t, int b0, int b1);
